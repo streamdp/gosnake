@@ -7,12 +7,12 @@ import (
 	"github.com/streamdp/gosnake/game"
 )
 
-func main()  {
+func main() {
 	var showHelp bool
 	var width int
 	var heigth int
 	var foodLimit int
-	
+
 	flag.BoolVar(&showHelp, "h", false, "display help")
 	flag.IntVar(&width, "width", 70, "set width of the game desk")
 	flag.IntVar(&heigth, "heigth", 20, "set heigth of the game desk")
@@ -27,21 +27,3 @@ func main()  {
 	}
 	game.Run(width, heigth, foodLimit)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
