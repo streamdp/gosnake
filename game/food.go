@@ -19,18 +19,18 @@ func newFood() (f *food) {
 	}
 }
 
-func drawFood(s tcell.Screen, d *desk, f *food) {
+func drawFood(screen tcell.Screen, desk *desk, food *food) {
 	style := tcell.StyleDefault.Background(tcell.ColorDarkMagenta)
-	for i := 0; i < len(f.position); i++ {
-		s.SetContent(d.rect.shiftX+f.position[i].x, d.rect.shiftY+f.position[i].y, tcell.RuneCkBoard, nil, style)
+	for i := 0; i < len(food.position); i++ {
+		screen.SetContent(desk.rect.shiftX+food.position[i].x, desk.rect.shiftY+food.position[i].y, tcell.RuneCkBoard, nil, style)
 	}
-	s.Show()
+	screen.Show()
 }
 
-func addFood(f *food, s *snake, d *desk) {
-	if len(f.position) < f.limit {
-		freeCells := difference(&s.body, &d.cells)
+func addFood(food *food, snake *snake, desk *desk) {
+	if len(food.position) < food.limit {
+		freeCells := difference(&snake.body, &desk.cells)
 		rand.Seed(time.Now().Unix())
-		f.position = append(f.position, (*freeCells)[rand.Int()%len(*freeCells)])
+		food.position = append(food.position, (*freeCells)[rand.Int()%len(*freeCells)])
 	}
 }
