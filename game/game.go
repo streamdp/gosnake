@@ -11,8 +11,8 @@ import (
 
 type button int
 
+//game actions
 const (
-	//game actions
 	RIGHT button = 1 + iota
 	LEFT
 	UP
@@ -81,7 +81,7 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 	}
 }
 
-//run game
+// Run is the function that starts the game
 func Run(width int, heigth int, foodLimit int) {
 	rand.Seed(time.Now().UnixNano())
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
