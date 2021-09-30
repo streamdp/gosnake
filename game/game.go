@@ -12,6 +12,7 @@ import (
 type button int
 
 const (
+	//game actions
 	RIGHT button = 1 + iota
 	LEFT
 	UP
@@ -30,11 +31,11 @@ func getXY(desk *desk) (xy coord) {
 }
 
 func newGame(screen tcell.Screen, width int, heigth int) (desk *desk, snake *snake, food *food) {
-	desk = newDesk(newRect(screen, width, heigth), &deskPallete{
+	desk = newDesk(newRect(screen, width, heigth), &deskPalette{
 		inner: tcell.StyleDefault.Background(tcell.ColorBisque),
 		outer: tcell.StyleDefault.Background(tcell.ColorPaleVioletRed),
 	})
-	snake = newSnake(getXY(desk), &snakePallete{
+	snake = newSnake(getXY(desk), &snakePalette{
 		head: tcell.StyleDefault.Background(tcell.Color161),
 		body: tcell.StyleDefault.Background(tcell.Color170),
 	})
@@ -80,7 +81,9 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 	}
 }
 
+//run game
 func Run(width int, heigth int, foodLimit int) {
+	rand.Seed(time.Now().UnixNano())
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
 	screen, err := tcell.NewScreen()
 	if err != nil {

@@ -6,7 +6,7 @@ import (
 	"github.com/gdamore/tcell"
 )
 
-type snakePallete struct {
+type snakePalette struct {
 	head tcell.Style
 	body tcell.Style
 }
@@ -15,20 +15,20 @@ type snake struct {
 	body      []coord
 	direction button
 	length    int
-	pallete   *snakePallete
+	palette   *snakePalette
 }
 
 func getRandomDirection() (bttn button) {
 	return button(rand.Intn(3) + 1)
 }
 
-func newSnake(xy coord, pallete *snakePallete) (s *snake) {
+func newSnake(xy coord, palette *snakePalette) (s *snake) {
 	snakeBody := []coord{xy}
 	return &snake{
 		body:      snakeBody,
 		direction: getRandomDirection(),
 		length:    3,
-		pallete:   pallete,
+		palette:   palette,
 	}
 }
 
@@ -115,9 +115,9 @@ func difference(snake *[]coord, desk *[]coord) (cells *[]coord) {
 
 func drawSnake(screen tcell.Screen, desk *desk, snake *snake) {
 	moveSnake(snake)
-	screen.SetContent(desk.rect.shiftX+snake.body[0].x, desk.rect.shiftY+snake.body[0].y, tcell.RuneCkBoard, nil, snake.pallete.head)
+	screen.SetContent(desk.rect.shiftX+snake.body[0].x, desk.rect.shiftY+snake.body[0].y, tcell.RuneCkBoard, nil, snake.palette.head)
 	for i := 1; i < snake.length; i++ {
-		screen.SetContent(desk.rect.shiftX+snake.body[i].x, desk.rect.shiftY+snake.body[i].y, tcell.RuneBoard, nil, snake.pallete.body)
+		screen.SetContent(desk.rect.shiftX+snake.body[i].x, desk.rect.shiftY+snake.body[i].y, tcell.RuneBoard, nil, snake.palette.body)
 	}
 	screen.Show()
 }

@@ -14,14 +14,14 @@ type coord struct {
 
 type desk struct {
 	rect    *rect
-	pallete *deskPallete
+	palette *deskPalette
 	cells   []coord
 	score   int
 	level   int
 	running bool
 }
 
-type deskPallete struct {
+type deskPalette struct {
 	outer tcell.Style
 	inner tcell.Style
 }
@@ -52,9 +52,9 @@ func drawDesk(screen tcell.Screen, desk *desk) {
 	for row := 0; row < desk.rect.heigth; row++ {
 		for col := 0; col < desk.rect.width; col++ {
 			if (row == 0 || row == desk.rect.heigth-1) || (col < 2 || col > desk.rect.width-3) {
-				screen.SetContent(desk.rect.shiftX+col, desk.rect.shiftY+row, tcell.RuneCkBoard, nil, desk.pallete.outer)
+				screen.SetContent(desk.rect.shiftX+col, desk.rect.shiftY+row, tcell.RuneCkBoard, nil, desk.palette.outer)
 			} else {
-				screen.SetContent(desk.rect.shiftX+col, desk.rect.shiftY+row, rune(' '), nil, desk.pallete.inner)
+				screen.SetContent(desk.rect.shiftX+col, desk.rect.shiftY+row, rune(' '), nil, desk.palette.inner)
 			}
 		}
 	}
@@ -72,7 +72,7 @@ func drawDesk(screen tcell.Screen, desk *desk) {
 	screen.Show()
 }
 
-func newDesk(rect *rect, pallete *deskPallete) (readyDesk *desk) {
+func newDesk(rect *rect, palette *deskPalette) (readyDesk *desk) {
 	var cells []coord
 	for i := 2; i < rect.width-2; i++ {
 		for j := 1; j < rect.heigth-1; j++ {
@@ -81,7 +81,7 @@ func newDesk(rect *rect, pallete *deskPallete) (readyDesk *desk) {
 	}
 	return &desk{
 		rect:    rect,
-		pallete: pallete,
+		palette: palette,
 		cells:   cells,
 		level:   1,
 		score:   0,
