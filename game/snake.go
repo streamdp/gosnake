@@ -6,15 +6,6 @@ import (
 	"github.com/gdamore/tcell"
 )
 
-type direction int
-
-const (
-	RIGHT direction = 1 + iota
-	LEFT
-	UP
-	DOWN
-)
-
 type snakePallete struct {
 	head tcell.Style
 	body tcell.Style
@@ -22,19 +13,22 @@ type snakePallete struct {
 
 type snake struct {
 	body      []coord
-	direction direction
+	direction button
 	length    int
 	pallete   *snakePallete
 }
 
-func newSnake(x int, y int, p *snakePallete) (s *snake) {
-	snakeBody := []coord{}
-	snakeBody = append(snakeBody, coord{x: x, y: y})
+func getRandomDirection() (bttn button) {
+	return button(rand.Intn(3) + 1)
+}
+
+func newSnake(xy coord, pallete *snakePallete) (s *snake) {
+	snakeBody := []coord{xy}
 	return &snake{
 		body:      snakeBody,
-		direction: direction(rand.Intn(3)) + 1,
-		length:    len(snakeBody) + 2,
-		pallete:   p,
+		direction: getRandomDirection(),
+		length:    3,
+		pallete:   pallete,
 	}
 }
 
@@ -42,10 +36,10 @@ func ateFood(food *food, snake *snake, desk *desk) {
 	for i := 0; i < len(food.position); i++ {
 		if food.position[i] == snake.body[0] {
 			food.position = append(food.position[:i], food.position[i+1:]...)
-			snake.length++
+			snake.length += 1
 			desk.score += 100
 			if snake.length%10 == 0 {
-				desk.level++
+				desk.level += 1
 			}
 		}
 	}
@@ -91,14 +85,14 @@ func moveSnake(snake *snake) {
 	}
 }
 
-func checkCollison(s *snake, d *desk) {
-	for i := 1; i < len(s.body); i++ {
-		if s.body[0] == s.body[i] {
-			d.running = false
+func checkCollison(snake *snake, desk *desk) {
+	for i := 1; i < len(snake.body); i++ {
+		if snake.body[0] == snake.body[i] {
+			desk.running = false
 		}
 	}
-	if (s.body[0].x == 1 || s.body[0].x == d.rect.width-2) || (s.body[0].y == 0 || s.body[0].y == d.rect.heigth-1) {
-		d.running = false
+	if (snake.body[0].x == 1 || snake.body[0].x == desk.rect.width-2) || (snake.body[0].y == 0 || snake.body[0].y == desk.rect.heigth-1) {
+		desk.running = false
 	}
 }
 
@@ -119,11 +113,11 @@ func difference(snake *[]coord, desk *[]coord) (cells *[]coord) {
 	return &freeCells
 }
 
-func drawSnake(s tcell.Screen, desk *desk, snake *snake) {
+func drawSnake(screen tcell.Screen, desk *desk, snake *snake) {
 	moveSnake(snake)
-	s.SetContent(desk.rect.shiftX+snake.body[0].x, desk.rect.shiftY+snake.body[0].y, tcell.RuneCkBoard, nil, snake.pallete.head)
+	screen.SetContent(desk.rect.shiftX+snake.body[0].x, desk.rect.shiftY+snake.body[0].y, tcell.RuneCkBoard, nil, snake.pallete.head)
 	for i := 1; i < snake.length; i++ {
-		s.SetContent(desk.rect.shiftX+snake.body[i].x, desk.rect.shiftY+snake.body[i].y, tcell.RuneBoard, nil, snake.pallete.body)
+		screen.SetContent(desk.rect.shiftX+snake.body[i].x, desk.rect.shiftY+snake.body[i].y, tcell.RuneBoard, nil, snake.pallete.body)
 	}
-	s.Show()
+	screen.Show()
 }
