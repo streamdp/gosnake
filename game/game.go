@@ -12,22 +12,29 @@ import (
 type button int
 
 const (
-	QUIT button = 1 + iota
+	RIGHT button = 1 + iota
+	LEFT
+	UP
+	DOWN
+	QUIT
 	RESTART
-	B_RIGHT
-	B_LEFT
-	B_UP
-	B_DOWN
 )
+
+func getXY(desk *desk) (xy coord) {
+	x := rand.Intn(desk.rect.width-3) + 2
+	y := rand.Intn(desk.rect.heigth-2) + 1
+	return coord{
+		x: x,
+		y: y,
+	}
+}
 
 func newGame(screen tcell.Screen, width int, heigth int) (desk *desk, snake *snake, food *food) {
 	desk = newDesk(newRect(screen, width, heigth), &deskPallete{
 		inner: tcell.StyleDefault.Background(tcell.ColorBisque),
 		outer: tcell.StyleDefault.Background(tcell.ColorPaleVioletRed),
 	})
-	x := rand.Intn(desk.rect.width-3) + 2
-	y := rand.Intn(desk.rect.heigth-2) + 1
-	snake = newSnake(x, y, &snakePallete{
+	snake = newSnake(getXY(desk), &snakePallete{
 		head: tcell.StyleDefault.Background(tcell.Color161),
 		body: tcell.StyleDefault.Background(tcell.Color170),
 	})
@@ -40,12 +47,9 @@ func restartGame(screen tcell.Screen, desk *desk, snake *snake, food *food) (d *
 	desk.score = 0
 	desk.running = true
 	snake.body = []coord{}
-	snake.body = append(snake.body, coord{
-		x: 2 + rand.Intn(desk.rect.width-3),
-		y: 1 + rand.Intn(desk.rect.heigth-2),
-	})
+	snake.body = append(snake.body, getXY(desk))
 	snake.length = 3
-	snake.direction = 1 + direction(rand.Intn(3))
+	snake.direction = getRandomDirection()
 	food.position = []coord{}
 	return desk, snake, food
 }
@@ -64,13 +68,13 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 			case tcell.KeyEnter:
 				buttonPressed <- RESTART
 			case tcell.KeyUp:
-				buttonPressed <- B_UP
+				buttonPressed <- UP
 			case tcell.KeyDown:
-				buttonPressed <- B_DOWN
+				buttonPressed <- DOWN
 			case tcell.KeyLeft:
-				buttonPressed <- B_LEFT
+				buttonPressed <- LEFT
 			case tcell.KeyRight:
-				buttonPressed <- B_RIGHT
+				buttonPressed <- RIGHT
 			}
 		}
 	}
@@ -105,14 +109,8 @@ func Run(width int, heigth int, foodLimit int) {
 				if !desk.running {
 					desk, snake, food = restartGame(screen, desk, snake, food)
 				}
-			case B_UP:
-				snake.direction = UP
-			case B_DOWN:
-				snake.direction = DOWN
-			case B_LEFT:
-				snake.direction = LEFT
-			case B_RIGHT:
-				snake.direction = RIGHT
+			case UP, DOWN, LEFT, RIGHT:
+				snake.direction = bPressed
 			}
 		case <-time.After(time.Millisecond * 50):
 		}
