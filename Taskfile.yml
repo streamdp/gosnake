@@ -5,10 +5,16 @@ tasks:
     desc: Run the app
     cmds:
     - GOFLAGS=-mod=mod go run main.go
+  
   build:
     desc: Build the app
     cmds:
     - GOFLAGS=-mod=mod go build -o bin/gophersay main.go 
+  
+  test:
+    desc: Run tests
+    cmds:
+    - GOFLAGS=-mod=mod go test ./game/
 
   clean:
     desc: Build the app
