@@ -10,7 +10,7 @@
   </p>
 </p>
 <p align="center">
-Another one version of the classic snake game written in golang with a library tcell.
+Another one version of the classic snake game written in golang with a library tcell. This is a test task, I spent about 16 hours to complete it.
 </p>
 
 # Build the app
