@@ -9,8 +9,9 @@
     </a>
   </p>
 </p>
-
+<p align="center">
 Another one version of the classic snake game written in golang with a library tcell.
+</p>
 
 # Build the app
 
@@ -58,7 +59,8 @@ Usage of ./gosnake:
 ./bin/gosnake                                                      
 ```
 
-![crazy gameplay screenshot one](assets/app_screenshot_1.png "Crazy game play in progress :)")
-![crazy gameplay screenshot two](assets/app_screenshot_2.png "Crazy game play in progress :)")
-![crazy gameplay screenshot three](assets/app_screenshot_3.png "Crazy game play in progress :)")
-![and game over screen](assets/app_screenshot_4.png "Crazy game play is over :)")
+<p align="center" width="100%">
+<img width="33%" src="assets/app_screenshot_2.png">
+<img width="33%" src="assets/app_screenshot_3.png">
+<img width="33%" src="assets/app_screenshot_4.png">
+</p>
