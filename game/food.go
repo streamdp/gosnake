@@ -8,13 +8,13 @@ import (
 )
 
 type food struct {
-	position []coord
+	position []coordinate
 	limit    int
 }
 
 func newFood() (f *food) {
 	return &food{
-		position: []coord{},
+		position: []coordinate{},
 		limit:    10,
 	}
 }

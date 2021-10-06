@@ -15,8 +15,8 @@ func main() {
 
 	flag.BoolVar(&showHelp, "h", false, "display help")
 	flag.IntVar(&width, "width", 70, "set width of the game desk")
-	flag.IntVar(&heigth, "heigth", 20, "set heigth of the game desk")
-	flag.IntVar(&foodLimit, "limit", 10, "set heigth of the game desk")
+	flag.IntVar(&heigth, "height", 20, "set height of the game desk")
+	flag.IntVar(&foodLimit, "limit", 10, "set food limit")
 	flag.Parse()
 
 	if showHelp {

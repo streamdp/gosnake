@@ -21,17 +21,17 @@ const (
 	RESTART
 )
 
-func getXY(desk *desk) (xy coord) {
+func getXY(desk *desk) (xy coordinate) {
 	x := rand.Intn(desk.rect.width-3) + 2
-	y := rand.Intn(desk.rect.heigth-2) + 1
-	return coord{
+	y := rand.Intn(desk.rect.height-2) + 1
+	return coordinate{
 		x: x,
 		y: y,
 	}
 }
 
-func newGame(screen tcell.Screen, width int, heigth int) (desk *desk, snake *snake, food *food) {
-	desk = newDesk(newRect(screen, width, heigth), &deskPalette{
+func newGame(screen tcell.Screen, width int, height int) (desk *desk, snake *snake, food *food) {
+	desk = newDesk(newRect(screen, width, height), &deskPalette{
 		inner: tcell.StyleDefault.Background(tcell.ColorBisque),
 		outer: tcell.StyleDefault.Background(tcell.ColorPaleVioletRed),
 	})
@@ -43,15 +43,15 @@ func newGame(screen tcell.Screen, width int, heigth int) (desk *desk, snake *sna
 	return desk, snake, food
 }
 
-func restartGame(screen tcell.Screen, desk *desk, snake *snake, food *food) (d *desk, s *snake, f *food) {
+func restartGame(desk *desk, snake *snake, food *food) (d *desk, s *snake, f *food) {
 	desk.level = 0
 	desk.score = 0
 	desk.running = true
-	snake.body = []coord{}
+	snake.body = []coordinate{}
 	snake.body = append(snake.body, getXY(desk))
 	snake.length = 3
 	snake.direction = getRandomDirection()
-	food.position = []coord{}
+	food.position = []coordinate{}
 	return desk, snake, food
 }
 
@@ -82,25 +82,26 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 }
 
 // Run is the function that starts the game
-func Run(width int, heigth int, foodLimit int) {
+func Run(width int, height int, foodLimit int) {
 	rand.Seed(time.Now().UnixNano())
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
 	screen, err := tcell.NewScreen()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
 	if err = screen.Init(); err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
 	screen.SetStyle(tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack))
 	screen.Clear()
-	desk, snake, food := newGame(screen, width, heigth)
+	desk, snake, food := newGame(screen, width, height)
 	food.limit = foodLimit
-	keyEvents := make(chan button)
 
+	keyEvents := make(chan button)
 	go getEvents(screen, keyEvents)
+
 	run := true
 	for run {
 		select {
@@ -110,7 +111,7 @@ func Run(width int, heigth int, foodLimit int) {
 				run = false
 			case RESTART:
 				if !desk.running {
-					desk, snake, food = restartGame(screen, desk, snake, food)
+					desk, snake, food = restartGame(desk, snake, food)
 				}
 			case UP, DOWN, LEFT, RIGHT:
 				snake.direction = bPressed
@@ -123,7 +124,7 @@ func Run(width int, heigth int, foodLimit int) {
 			addFood(food, snake, desk)
 			drawFood(screen, desk, food)
 			ateFood(food, snake, desk)
-			checkCollison(snake, desk)
+			checkCollision(snake, desk)
 		}
 		time.Sleep(time.Millisecond * time.Duration(100-5*desk.level))
 	}

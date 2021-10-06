@@ -7,7 +7,7 @@ import (
 	"github.com/mattn/go-runewidth"
 )
 
-type coord struct {
+type coordinate struct {
 	x int
 	y int
 }
@@ -15,7 +15,7 @@ type coord struct {
 type desk struct {
 	rect    *rect
 	palette *deskPalette
-	cells   []coord
+	cells   []coordinate
 	score   int
 	level   int
 	running bool
@@ -28,7 +28,7 @@ type deskPalette struct {
 
 type rect struct {
 	width  int
-	heigth int
+	height int
 	shiftX int
 	shiftY int
 }
@@ -49,9 +49,9 @@ func drawStr(screen tcell.Screen, x int, y int, style tcell.Style, str string) {
 
 func drawDesk(screen tcell.Screen, desk *desk) {
 	screen.Clear()
-	for row := 0; row < desk.rect.heigth; row++ {
+	for row := 0; row < desk.rect.height; row++ {
 		for col := 0; col < desk.rect.width; col++ {
-			if (row == 0 || row == desk.rect.heigth-1) || (col < 2 || col > desk.rect.width-3) {
+			if (row == 0 || row == desk.rect.height-1) || (col < 2 || col > desk.rect.width-3) {
 				screen.SetContent(desk.rect.shiftX+col, desk.rect.shiftY+row, tcell.RuneCkBoard, nil, desk.palette.outer)
 			} else {
 				screen.SetContent(desk.rect.shiftX+col, desk.rect.shiftY+row, rune(' '), nil, desk.palette.inner)
@@ -65,18 +65,18 @@ func drawDesk(screen tcell.Screen, desk *desk) {
 	} else {
 		style := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorDarkRed)
 		text := "GAME OVER! YOU SCORE: " + strconv.Itoa(desk.score)
-		drawStr(screen, desk.rect.shiftX+desk.rect.width/2-len([]rune(text))/2, desk.rect.heigth/2, style, text)
+		drawStr(screen, desk.rect.shiftX+desk.rect.width/2-len([]rune(text))/2, desk.rect.height/2, style, text)
 		text = "PRESS ESC TO QUIT OR ENTER TO PLAY AGAIN"
-		drawStr(screen, desk.rect.shiftX+desk.rect.width/2-len([]rune(text))/2, desk.rect.heigth/2+1, style.Reverse(true), text)
+		drawStr(screen, desk.rect.shiftX+desk.rect.width/2-len([]rune(text))/2, desk.rect.height/2+1, style.Reverse(true), text)
 	}
 	screen.Show()
 }
 
 func newDesk(rect *rect, palette *deskPalette) (readyDesk *desk) {
-	var cells []coord
+	var cells []coordinate
 	for i := 2; i < rect.width-2; i++ {
-		for j := 1; j < rect.heigth-1; j++ {
-			cells = append(cells, coord{x: i, y: j})
+		for j := 1; j < rect.height-1; j++ {
+			cells = append(cells, coordinate{x: i, y: j})
 		}
 	}
 	return &desk{
@@ -89,11 +89,11 @@ func newDesk(rect *rect, palette *deskPalette) (readyDesk *desk) {
 	}
 }
 
-func newRect(screen tcell.Screen, width int, heigth int) (rectangle *rect) {
+func newRect(screen tcell.Screen, width int, height int) (rectangle *rect) {
 	sWidth, _ := screen.Size()
 	return &rect{
 		width:  width,
-		heigth: heigth,
+		height: height,
 		shiftX: sWidth/2 - width/2,
 		shiftY: 1,
 	}
