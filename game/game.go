@@ -56,6 +56,7 @@ func restartGame(desk *desk, snake *snake, food *food) (d *desk, s *snake, f *fo
 }
 
 func getEvents(screen tcell.Screen, buttonPressed chan button) {
+	previousPressed := button(0)
 	for {
 		event := screen.PollEvent()
 		switch event := event.(type) {
@@ -69,13 +70,25 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 			case tcell.KeyEnter:
 				buttonPressed <- RESTART
 			case tcell.KeyUp:
-				buttonPressed <- UP
+				if previousPressed != UP {
+					buttonPressed <- UP
+					previousPressed = UP
+				}
 			case tcell.KeyDown:
-				buttonPressed <- DOWN
+				if previousPressed != DOWN {
+					buttonPressed <- DOWN
+					previousPressed = DOWN
+				}
 			case tcell.KeyLeft:
-				buttonPressed <- LEFT
+				if previousPressed != LEFT {
+					buttonPressed <- LEFT
+					previousPressed = LEFT
+				}
 			case tcell.KeyRight:
-				buttonPressed <- RIGHT
+				if previousPressed != RIGHT {
+					buttonPressed <- RIGHT
+					previousPressed = RIGHT
+				}
 			}
 		}
 	}
@@ -114,6 +127,12 @@ func Run(width int, height int, foodLimit int) {
 					desk, snake, food = restartGame(desk, snake, food)
 				}
 			case UP, DOWN, LEFT, RIGHT:
+				if snake.direction == UP && bPressed == DOWN || snake.direction == DOWN && bPressed == UP {
+					continue
+				}
+				if snake.direction == LEFT && bPressed == RIGHT || snake.direction == RIGHT && bPressed == LEFT {
+					continue
+				}
 				snake.direction = bPressed
 			}
 		case <-time.After(time.Millisecond * 50):
