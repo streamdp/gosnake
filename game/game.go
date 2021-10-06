@@ -94,12 +94,24 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 	}
 }
 
+func validDirectionSelected(current, new button) (accept bool) {
+	if current == UP && new == DOWN || current == DOWN && new == UP {
+		return false
+	}
+	if current == LEFT && new == RIGHT || current == RIGHT && new == LEFT {
+		return false
+	}
+	return true
+}
+
 // Run is the function that starts the game
 func Run(width int, height int, foodLimit int) {
+	var screen tcell.Screen
+	var err error
+	var run = true
 	rand.Seed(time.Now().UnixNano())
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
-	screen, err := tcell.NewScreen()
-	if err != nil {
+	if screen, err = tcell.NewScreen(); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
@@ -111,10 +123,8 @@ func Run(width int, height int, foodLimit int) {
 	screen.Clear()
 	desk, snake, food := newGame(screen, width, height)
 	food.limit = foodLimit
-
 	keyEvents := make(chan button)
 	go getEvents(screen, keyEvents)
-	run := true
 	for run {
 		select {
 		case bPressed := <-keyEvents:
@@ -126,13 +136,9 @@ func Run(width int, height int, foodLimit int) {
 					desk, snake, food = restartGame(desk, snake, food)
 				}
 			case UP, DOWN, LEFT, RIGHT:
-				if snake.direction == UP && bPressed == DOWN || snake.direction == DOWN && bPressed == UP {
-					continue
+				if validDirectionSelected(snake.direction, bPressed) {
+					snake.direction = bPressed
 				}
-				if snake.direction == LEFT && bPressed == RIGHT || snake.direction == RIGHT && bPressed == LEFT {
-					continue
-				}
-				snake.direction = bPressed
 			}
 		case <-time.After(time.Millisecond * 50):
 		}
