@@ -119,5 +119,4 @@ func drawSnake(screen tcell.Screen, desk *desk, snake *snake) {
 	for i := 1; i < snake.length; i++ {
 		screen.SetContent(desk.rect.shiftX+snake.body[i].x, desk.rect.shiftY+snake.body[i].y, tcell.RuneBoard, nil, snake.palette.body)
 	}
-	screen.Show()
 }

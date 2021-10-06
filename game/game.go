@@ -114,7 +114,6 @@ func Run(width int, height int, foodLimit int) {
 
 	keyEvents := make(chan button)
 	go getEvents(screen, keyEvents)
-
 	run := true
 	for run {
 		select {
@@ -145,6 +144,7 @@ func Run(width int, height int, foodLimit int) {
 			ateFood(food, snake, desk)
 			checkCollision(snake, desk)
 		}
+		screen.Show()
 		time.Sleep(time.Millisecond * time.Duration(100-5*desk.level))
 	}
 	screen.Fini()

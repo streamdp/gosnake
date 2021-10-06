@@ -24,7 +24,6 @@ func drawFood(screen tcell.Screen, desk *desk, food *food) {
 	for i := 0; i < len(food.position); i++ {
 		screen.SetContent(desk.rect.shiftX+food.position[i].x, desk.rect.shiftY+food.position[i].y, tcell.RuneCkBoard, nil, style)
 	}
-	screen.Show()
 }
 
 func addFood(food *food, snake *snake, desk *desk) {

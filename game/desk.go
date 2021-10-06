@@ -48,7 +48,6 @@ func drawStr(screen tcell.Screen, x int, y int, style tcell.Style, str string) {
 }
 
 func drawDesk(screen tcell.Screen, desk *desk) {
-	screen.Clear()
 	for row := 0; row < desk.rect.height; row++ {
 		for col := 0; col < desk.rect.width; col++ {
 			if (row == 0 || row == desk.rect.height-1) || (col < 2 || col > desk.rect.width-3) {
@@ -69,7 +68,6 @@ func drawDesk(screen tcell.Screen, desk *desk) {
 		text = "PRESS ESC TO QUIT OR ENTER TO PLAY AGAIN"
 		drawStr(screen, desk.rect.shiftX+desk.rect.width/2-len([]rune(text))/2, desk.rect.height/2+1, style.Reverse(true), text)
 	}
-	screen.Show()
 }
 
 func newDesk(rect *rect, palette *deskPalette) (readyDesk *desk) {
