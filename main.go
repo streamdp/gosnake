@@ -10,12 +10,12 @@ import (
 func main() {
 	var showHelp bool
 	var width int
-	var heigth int
+	var height int
 	var foodLimit int
 
 	flag.BoolVar(&showHelp, "h", false, "display help")
 	flag.IntVar(&width, "width", 70, "set width of the game desk")
-	flag.IntVar(&heigth, "height", 20, "set height of the game desk")
+	flag.IntVar(&height, "height", 20, "set height of the game desk")
 	flag.IntVar(&foodLimit, "limit", 10, "set food limit")
 	flag.Parse()
 
@@ -25,5 +25,5 @@ func main() {
 		flag.Usage()
 		return
 	}
-	game.Run(width, heigth, foodLimit)
+	game.Run(width, height, foodLimit)
 }

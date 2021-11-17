@@ -18,11 +18,11 @@ type snake struct {
 	palette   *snakePalette
 }
 
-func getRandomDirection() (btn button) {
+func getRandomDirection() button {
 	return button(rand.Intn(3) + 1)
 }
 
-func newSnake(xy coordinate, palette *snakePalette) (s *snake) {
+func newSnake(xy coordinate, palette *snakePalette) *snake {
 	snakeBody := []coordinate{xy}
 	return &snake{
 		body:      snakeBody,
@@ -96,7 +96,7 @@ func checkCollision(snake *snake, desk *desk) {
 	}
 }
 
-func difference(snake *[]coordinate, desk *[]coordinate) (cells *[]coordinate) {
+func difference(snake *[]coordinate, desk *[]coordinate) *[]coordinate {
 	var freeCells []coordinate
 	m := map[coordinate]int{}
 	for _, snakeVal := range *snake {

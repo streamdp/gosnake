@@ -12,7 +12,7 @@ type food struct {
 	limit    int
 }
 
-func newFood() (f *food) {
+func newFood() *food {
 	return &food{
 		position: []coordinate{},
 		limit:    10,

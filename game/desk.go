@@ -70,7 +70,7 @@ func drawDesk(screen tcell.Screen, desk *desk) {
 	}
 }
 
-func newDesk(rect *rect, palette *deskPalette) (readyDesk *desk) {
+func newDesk(rect *rect, palette *deskPalette) *desk {
 	var cells []coordinate
 	for i := 2; i < rect.width-2; i++ {
 		for j := 1; j < rect.height-1; j++ {
@@ -87,7 +87,7 @@ func newDesk(rect *rect, palette *deskPalette) (readyDesk *desk) {
 	}
 }
 
-func newRect(screen tcell.Screen, width int, height int) (rectangle *rect) {
+func newRect(screen tcell.Screen, width int, height int) *rect {
 	sWidth, _ := screen.Size()
 	return &rect{
 		width:  width,

@@ -21,7 +21,7 @@ const (
 	RESTART
 )
 
-func getXY(desk *desk) (xy coordinate) {
+func getXY(desk *desk) coordinate {
 	x := rand.Intn(desk.rect.width-3) + 2
 	y := rand.Intn(desk.rect.height-2) + 1
 	return coordinate{
@@ -40,10 +40,10 @@ func newGame(screen tcell.Screen, width int, height int) (desk *desk, snake *sna
 		body: tcell.StyleDefault.Background(tcell.Color170),
 	})
 	food = newFood()
-	return desk, snake, food
+	return
 }
 
-func restartGame(desk *desk, snake *snake, food *food) (d *desk, s *snake, f *food) {
+func restartGame(desk *desk, snake *snake, food *food) (*desk, *snake, *food) {
 	desk.level = 0
 	desk.score = 0
 	desk.running = true
@@ -96,10 +96,10 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 
 func validDirectionSelected(current, new button) (accept bool) {
 	if current == UP && new == DOWN || current == DOWN && new == UP {
-		return false
+		return
 	}
 	if current == LEFT && new == RIGHT || current == RIGHT && new == LEFT {
-		return false
+		return
 	}
 	return true
 }
