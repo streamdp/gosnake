@@ -53,7 +53,7 @@ func newGame(screen tcell.Screen, width int, height int) *Game {
 
 func (g *Game) restartGame() *Game {
 	g.screen.Clear()
-	g.desk.level = 0
+	g.desk.level = 1
 	g.desk.score = 0
 	g.snake.body = []coordinate{}
 	g.snake.body = append(g.snake.body, g.desk.getRandPoint())
