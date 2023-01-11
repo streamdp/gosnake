@@ -27,8 +27,8 @@ func drawFood(screen tcell.Screen, desk *desk, food *food) {
 
 func getRandPoint(desk *desk) coordinate {
 	return coordinate{
-		x: 4 + rand.Intn(desk.rect.width-4),
-		y: 1 + rand.Intn(desk.rect.height-1),
+		x: 2 + rand.Intn(desk.rect.width-4),
+		y: 1 + rand.Intn(desk.rect.height-2),
 	}
 }
 
