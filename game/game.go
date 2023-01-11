@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gdamore/tcell"
+	"github.com/mattn/go-runewidth"
 )
 
 type button int
 
-// game actions
+// Game actions
 const (
 	RIGHT button = 1 + iota
 	LEFT
@@ -21,38 +23,45 @@ const (
 	RESTART
 )
 
-func getXY(desk *desk) coordinate {
-	x := rand.Intn(desk.rect.width-3) + 2
-	y := rand.Intn(desk.rect.height-2) + 1
-	return coordinate{
-		x: x,
-		y: y,
+type Game struct {
+	screen  tcell.Screen
+	desk    *desk
+	snake   *snake
+	food    *food
+	running bool
+}
+
+func (g *Game) isRunning() bool {
+	return g.running
+}
+
+func (g *Game) level() int {
+	return g.desk.level
+}
+
+func newGame(screen tcell.Screen, width int, height int) *Game {
+	screenSize, _ := screen.Size()
+	d := newDesk(newRect(screenSize, width, height), defaultDeskPalette)
+	return &Game{
+		screen:  screen,
+		desk:    d,
+		snake:   newSnake(d.getRandPoint(), defaultSnakePalette),
+		food:    newFood(),
+		running: true,
 	}
 }
 
-func newGame(screen tcell.Screen, width int, height int) (desk *desk, snake *snake, food *food) {
-	desk = newDesk(newRect(screen, width, height), &deskPalette{
-		inner: tcell.StyleDefault.Background(tcell.ColorBisque),
-		outer: tcell.StyleDefault.Background(tcell.ColorPaleVioletRed),
-	})
-	snake = newSnake(getXY(desk), &snakePalette{
-		head: tcell.StyleDefault.Background(tcell.Color161),
-		body: tcell.StyleDefault.Background(tcell.Color170),
-	})
-	food = newFood()
-	return
-}
-
-func restartGame(desk *desk, snake *snake, food *food) (*desk, *snake, *food) {
-	desk.level = 0
-	desk.score = 0
-	desk.running = true
-	snake.body = []coordinate{}
-	snake.body = append(snake.body, getXY(desk))
-	snake.length = 3
-	snake.direction = getRandomDirection()
-	food.position = make(map[coordinate]struct{}, food.limit)
-	return desk, snake, food
+func (g *Game) restartGame() *Game {
+	g.screen.Clear()
+	g.desk.level = 0
+	g.desk.score = 0
+	g.snake.body = []coordinate{}
+	g.snake.body = append(g.snake.body, g.desk.getRandPoint())
+	g.snake.length = 3
+	g.snake.direction = getRandomDirection()
+	g.food.position = make(map[coordinate]struct{}, g.food.limit)
+	g.running = true
+	return g
 }
 
 func getEvents(screen tcell.Screen, buttonPressed chan button) {
@@ -94,22 +103,74 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 	}
 }
 
-func validDirectionSelected(current, new button) (accept bool) {
-	if current == UP && new == DOWN || current == DOWN && new == UP {
-		return
+func drawStr(screen tcell.Screen, x int, y int, style tcell.Style, str string) {
+	for _, c := range str {
+		var comb []rune
+		width := runewidth.RuneWidth(c)
+		if width == 0 {
+			comb = []rune{c}
+			c = ' '
+			width = 1
+		}
+		screen.SetContent(x, y, c, comb, style)
+		x += width
 	}
-	if current == LEFT && new == RIGHT || current == RIGHT && new == LEFT {
-		return
-	}
-	return true
 }
 
-// Run is the function that starts the game
-func Run(width int, height int, foodLimit int) {
-	var screen tcell.Screen
-	var err error
-	var run = true
-	rand.Seed(time.Now().UnixNano())
+func (g *Game) drawDesk() {
+	for row := 0; row < g.desk.rect.height; row++ {
+		for col := 0; col < g.desk.rect.width; col++ {
+			if (row == 0 || row == g.desk.rect.height-1) || (col < 2 || col > g.desk.rect.width-3) {
+				g.screen.SetContent(g.desk.rect.shiftX+col, g.desk.rect.shiftY+row, tcell.RuneCkBoard, nil, g.desk.palette.outer)
+			} else {
+				g.screen.SetContent(g.desk.rect.shiftX+col, g.desk.rect.shiftY+row, rune(' '), nil, g.desk.palette.inner)
+			}
+		}
+	}
+	if !g.isRunning() {
+		style := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorDarkRed)
+		text := "GAME OVER! YOU SCORE: " + strconv.Itoa(g.desk.score)
+		drawStr(g.screen, g.desk.rect.shiftX+g.desk.rect.width/2-len([]rune(text))/2, g.desk.rect.height/2, style, text)
+		text = "PRESS ESC TO QUIT OR ENTER TO PLAY AGAIN"
+		drawStr(g.screen, g.desk.rect.shiftX+g.desk.rect.width/2-len([]rune(text))/2, g.desk.rect.height/2+1, style.Reverse(true), text)
+		return
+	}
+	style := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack)
+	text := "Score: " + strconv.Itoa(g.desk.score) + "  Level: " + strconv.Itoa(g.desk.level)
+	drawStr(g.screen, g.desk.rect.shiftX+1, 0, style, text)
+}
+
+func (g *Game) drawSnake() {
+	g.snake.moveSnake()
+	g.screen.SetContent(g.desk.rect.shiftX+g.snake.body[0].x, g.desk.rect.shiftY+g.snake.body[0].y, tcell.RuneCkBoard, nil, g.snake.palette.head)
+	for i := 1; i < g.snake.length; i++ {
+		g.screen.SetContent(g.desk.rect.shiftX+g.snake.body[i].x, g.desk.rect.shiftY+g.snake.body[i].y, tcell.RuneBoard, nil, g.snake.palette.body)
+	}
+}
+
+func (g *Game) drawFood() {
+	style := tcell.StyleDefault.Background(tcell.ColorDarkMagenta)
+	for fp := range g.food.position {
+		g.screen.SetContent(g.desk.rect.shiftX+fp.x, g.desk.rect.shiftY+fp.y, tcell.RuneCkBoard, nil, style)
+	}
+}
+
+func (g *Game) checkCollisions() {
+	for i := 1; i < len(g.snake.body); i++ {
+		if g.snake.body[0] == g.snake.body[i] {
+			g.running = false
+		}
+	}
+	if (g.snake.body[0].x == 1 || g.snake.body[0].x == g.desk.rect.width-2) || (g.snake.body[0].y == 0 || g.snake.body[0].y == g.desk.rect.height-1) {
+		g.running = false
+	}
+}
+
+func newScreen() tcell.Screen {
+	var (
+		screen tcell.Screen
+		err    error
+	)
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
 	if screen, err = tcell.NewScreen(); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
@@ -121,39 +182,45 @@ func Run(width int, height int, foodLimit int) {
 	}
 	screen.SetStyle(tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack))
 	screen.Clear()
-	dsk, snk, fd := newGame(screen, width, height)
-	if fd.limit != 0 {
-		fd.limit = foodLimit
-	}
+	return screen
+}
+
+func NewGame(width int, height int, foodLimit int) *Game {
+	rand.Seed(time.Now().UnixNano())
+	g := newGame(newScreen(), width, height)
+	g.food.limit = foodLimit
+	return g
+}
+
+// Run is the function that starts the Game
+func (g *Game) Run() {
+	defer g.screen.Fini()
 	keyEvents := make(chan button)
-	go getEvents(screen, keyEvents)
-	for run {
+	go getEvents(g.screen, keyEvents)
+	for {
 		select {
 		case bPressed := <-keyEvents:
 			switch bPressed {
 			case QUIT:
-				run = false
+				return
 			case RESTART:
-				if !dsk.running {
-					dsk, snk, fd = restartGame(dsk, snk, fd)
+				if !g.isRunning() {
+					g.restartGame()
 				}
 			case UP, DOWN, LEFT, RIGHT:
-				if validDirectionSelected(snk.direction, bPressed) {
-					snk.direction = bPressed
-				}
+				g.snake.setDirection(bPressed)
 			}
 		case <-time.After(time.Millisecond * 50):
 		}
-		drawDesk(screen, dsk)
-		if dsk.running {
-			drawSnake(screen, dsk, snk)
-			addFood(fd, snk, dsk)
-			drawFood(screen, dsk, fd)
-			ateFood(fd, snk, dsk)
-			checkCollision(snk, dsk)
+		g.drawDesk()
+		if g.isRunning() {
+			g.drawSnake()
+			g.food.add(g.snake, g.desk)
+			g.drawFood()
+			g.snake.ateFood(g.food, g.desk)
+			g.checkCollisions()
 		}
-		screen.Show()
-		time.Sleep(time.Millisecond * time.Duration(100-5*dsk.level))
+		g.screen.Show()
+		time.Sleep(time.Millisecond * time.Duration(100-5*g.level()))
 	}
-	screen.Fini()
 }

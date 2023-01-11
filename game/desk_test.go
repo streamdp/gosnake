@@ -8,7 +8,7 @@ import (
 )
 
 func TestGetXY(t *testing.T) {
-	desk := &desk{
+	d := &desk{
 		rect: &rect{
 			width:  70,
 			height: 20,
@@ -19,20 +19,19 @@ func TestGetXY(t *testing.T) {
 			outer: tcell.StyleDefault,
 			inner: tcell.StyleDefault,
 		},
-		score:   0,
-		level:   1,
-		running: true,
+		score: 0,
+		level: 1,
 	}
-	got := getXY(desk)
+	got := d.getRandPoint()
 
 	if !IsInstanceOf(got, coordinate{}) {
 		t.Errorf("got %v; should be %v", reflect.TypeOf(got), reflect.TypeOf(coordinate{}))
 	}
-	if got.x < 2 || got.x > desk.rect.width-3 {
-		t.Errorf("got %d; should be [%v..%v]", got, 2, desk.rect.width-3)
+	if got.x < 2 || got.x > d.rect.width-3 {
+		t.Errorf("got %d; should be [%v..%v]", got, 2, d.rect.width-3)
 	}
-	if got.y < 1 || got.y > desk.rect.height-2 {
-		t.Errorf("got %d; should be [%v..%v]", got, 1, desk.rect.height-2)
+	if got.y < 1 || got.y > d.rect.height-2 {
+		t.Errorf("got %d; should be [%v..%v]", got, 1, d.rect.height-2)
 	}
 }
 

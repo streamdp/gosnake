@@ -25,5 +25,5 @@ func main() {
 		flag.Usage()
 		return
 	}
-	game.Run(width, height, foodLimit)
+	game.NewGame(width, height, foodLimit).Run()
 }

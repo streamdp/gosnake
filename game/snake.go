@@ -18,88 +18,84 @@ type snake struct {
 	palette   *snakePalette
 }
 
+var defaultSnakePalette = &snakePalette{
+	head: tcell.StyleDefault.Background(tcell.Color161),
+	body: tcell.StyleDefault.Background(tcell.Color170),
+}
+
 func getRandomDirection() button {
 	return button(rand.Intn(4) + 1)
 }
 
 func newSnake(xy coordinate, palette *snakePalette) *snake {
-	snakeBody := []coordinate{xy}
 	return &snake{
-		body:      snakeBody,
+		body:      []coordinate{xy},
 		direction: getRandomDirection(),
 		length:    3,
 		palette:   palette,
 	}
 }
 
-func ateFood(food *food, snake *snake, desk *desk) {
+func (s *snake) ateFood(food *food, desk *desk) {
 	for fp := range food.position {
-		if fp.x == snake.body[0].x && fp.y == snake.body[0].y {
+		if fp.x == s.body[0].x && fp.y == s.body[0].y {
 			delete(food.position, fp)
-			snake.length += 1
+			s.length += 1
 			desk.score += 100
-			if snake.length%10 == 0 {
+			if s.length%10 == 0 {
 				desk.level += 1
 			}
 		}
 	}
 }
 
-func moveSnake(snake *snake) {
-	bodyLength := len(snake.body)
-	lastSegment := snake.body[bodyLength-1]
-	firstSegment := snake.body[0]
-	switch snake.direction {
+func (s *snake) setDirection(new button) {
+	if s.direction == UP && new == DOWN || s.direction == DOWN && new == UP {
+		return
+	}
+	if s.direction == LEFT && new == RIGHT || s.direction == RIGHT && new == LEFT {
+		return
+	}
+	s.direction = new
+	return
+}
+
+func (s *snake) moveSnake() {
+	bodyLength := len(s.body)
+	lastSegment := s.body[bodyLength-1]
+	firstSegment := s.body[0]
+	switch s.direction {
 	case LEFT:
-		snake.body[0].x -= 1
-		for i := 1; i < snake.length; i++ {
+		s.body[0].x -= 1
+		for i := 1; i < s.length; i++ {
 			if i >= bodyLength {
-				snake.body = append(snake.body, lastSegment)
+				s.body = append(s.body, lastSegment)
 			}
-			firstSegment, snake.body[i] = snake.body[i], firstSegment
+			firstSegment, s.body[i] = s.body[i], firstSegment
 		}
 	case RIGHT:
-		snake.body[0].x += 1
-		for i := 1; i < snake.length; i++ {
+		s.body[0].x += 1
+		for i := 1; i < s.length; i++ {
 			if i >= bodyLength {
-				snake.body = append(snake.body, lastSegment)
+				s.body = append(s.body, lastSegment)
 			}
-			firstSegment, snake.body[i] = snake.body[i], firstSegment
+			firstSegment, s.body[i] = s.body[i], firstSegment
 		}
 	case UP:
-		snake.body[0].y -= 1
-		for i := 1; i < snake.length; i++ {
+		s.body[0].y -= 1
+		for i := 1; i < s.length; i++ {
 			if i >= bodyLength {
-				snake.body = append(snake.body, lastSegment)
+				s.body = append(s.body, lastSegment)
 			}
-			firstSegment, snake.body[i] = snake.body[i], firstSegment
+			firstSegment, s.body[i] = s.body[i], firstSegment
 		}
 	case DOWN:
-		snake.body[0].y += 1
-		for i := 1; i < snake.length; i++ {
+		s.body[0].y += 1
+		for i := 1; i < s.length; i++ {
 			if i >= bodyLength {
-				snake.body = append(snake.body, lastSegment)
+				s.body = append(s.body, lastSegment)
 			}
-			firstSegment, snake.body[i] = snake.body[i], firstSegment
+			firstSegment, s.body[i] = s.body[i], firstSegment
 		}
-	}
-}
-
-func checkCollision(snake *snake, desk *desk) {
-	for i := 1; i < len(snake.body); i++ {
-		if snake.body[0] == snake.body[i] {
-			desk.running = false
-		}
-	}
-	if (snake.body[0].x == 1 || snake.body[0].x == desk.rect.width-2) || (snake.body[0].y == 0 || snake.body[0].y == desk.rect.height-1) {
-		desk.running = false
-	}
-}
-
-func drawSnake(screen tcell.Screen, desk *desk, snake *snake) {
-	moveSnake(snake)
-	screen.SetContent(desk.rect.shiftX+snake.body[0].x, desk.rect.shiftY+snake.body[0].y, tcell.RuneCkBoard, nil, snake.palette.head)
-	for i := 1; i < snake.length; i++ {
-		screen.SetContent(desk.rect.shiftX+snake.body[i].x, desk.rect.shiftY+snake.body[i].y, tcell.RuneBoard, nil, snake.palette.body)
 	}
 }
