@@ -19,7 +19,7 @@ type snake struct {
 }
 
 func getRandomDirection() button {
-	return button(rand.Intn(3) + 1)
+	return button(rand.Intn(4) + 1)
 }
 
 func newSnake(xy coordinate, palette *snakePalette) *snake {
@@ -33,9 +33,9 @@ func newSnake(xy coordinate, palette *snakePalette) *snake {
 }
 
 func ateFood(food *food, snake *snake, desk *desk) {
-	for i := 0; i < len(food.position); i++ {
-		if food.position[i] == snake.body[0] {
-			food.position = append(food.position[:i], food.position[i+1:]...)
+	for fp := range food.position {
+		if fp.x == snake.body[0].x && fp.y == snake.body[0].y {
+			delete(food.position, fp)
 			snake.length += 1
 			desk.score += 100
 			if snake.length%10 == 0 {
@@ -94,23 +94,6 @@ func checkCollision(snake *snake, desk *desk) {
 	if (snake.body[0].x == 1 || snake.body[0].x == desk.rect.width-2) || (snake.body[0].y == 0 || snake.body[0].y == desk.rect.height-1) {
 		desk.running = false
 	}
-}
-
-func difference(snake *[]coordinate, desk *[]coordinate) *[]coordinate {
-	var freeCells []coordinate
-	m := map[coordinate]int{}
-	for _, snakeVal := range *snake {
-		m[snakeVal] = 1
-	}
-	for _, deskVal := range *desk {
-		m[deskVal] = m[deskVal] + 1
-	}
-	for mKey, mVal := range m {
-		if mVal == 1 {
-			freeCells = append(freeCells, mKey)
-		}
-	}
-	return &freeCells
 }
 
 func drawSnake(screen tcell.Screen, desk *desk, snake *snake) {

@@ -15,7 +15,6 @@ type coordinate struct {
 type desk struct {
 	rect    *rect
 	palette *deskPalette
-	cells   []coordinate
 	score   int
 	level   int
 	running bool
@@ -71,16 +70,9 @@ func drawDesk(screen tcell.Screen, desk *desk) {
 }
 
 func newDesk(rect *rect, palette *deskPalette) *desk {
-	var cells []coordinate
-	for i := 2; i < rect.width-2; i++ {
-		for j := 1; j < rect.height-1; j++ {
-			cells = append(cells, coordinate{x: i, y: j})
-		}
-	}
 	return &desk{
 		rect:    rect,
 		palette: palette,
-		cells:   cells,
 		level:   1,
 		score:   0,
 		running: true,

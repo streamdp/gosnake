@@ -2,34 +2,50 @@ package game
 
 import (
 	"math/rand"
-	"time"
 
 	"github.com/gdamore/tcell"
 )
 
 type food struct {
-	position []coordinate
+	position map[coordinate]struct{}
 	limit    int
 }
 
 func newFood() *food {
 	return &food{
-		position: []coordinate{},
+		position: make(map[coordinate]struct{}, 10),
 		limit:    10,
 	}
 }
 
 func drawFood(screen tcell.Screen, desk *desk, food *food) {
 	style := tcell.StyleDefault.Background(tcell.ColorDarkMagenta)
-	for i := 0; i < len(food.position); i++ {
-		screen.SetContent(desk.rect.shiftX+food.position[i].x, desk.rect.shiftY+food.position[i].y, tcell.RuneCkBoard, nil, style)
+	for fp := range food.position {
+		screen.SetContent(desk.rect.shiftX+fp.x, desk.rect.shiftY+fp.y, tcell.RuneCkBoard, nil, style)
+	}
+}
+
+func getRandPoint(desk *desk) coordinate {
+	return coordinate{
+		x: 4 + rand.Intn(desk.rect.width-4),
+		y: 1 + rand.Intn(desk.rect.height-1),
 	}
 }
 
 func addFood(food *food, snake *snake, desk *desk) {
 	if len(food.position) < food.limit {
-		freeCells := difference(&snake.body, &desk.cells)
-		rand.Seed(time.Now().Unix())
-		food.position = append(food.position, (*freeCells)[rand.Int()%len(*freeCells)])
+		var newFoodPoint = coordinate{}
+	loop:
+		for {
+			newFoodPoint = getRandPoint(desk)
+			for i := range snake.body {
+				_, ok := food.position[newFoodPoint]
+				if ok || snake.body[i] == newFoodPoint {
+					continue loop
+				}
+			}
+			break
+		}
+		food.position[newFoodPoint] = struct{}{}
 	}
 }

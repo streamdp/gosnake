@@ -19,12 +19,6 @@ func TestGetXY(t *testing.T) {
 			outer: tcell.StyleDefault,
 			inner: tcell.StyleDefault,
 		},
-		cells: []coordinate{
-			{
-				x: 1,
-				y: 1,
-			},
-		},
 		score:   0,
 		level:   1,
 		running: true,

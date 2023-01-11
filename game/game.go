@@ -11,7 +11,7 @@ import (
 
 type button int
 
-//game actions
+// game actions
 const (
 	RIGHT button = 1 + iota
 	LEFT
@@ -51,7 +51,7 @@ func restartGame(desk *desk, snake *snake, food *food) (*desk, *snake, *food) {
 	snake.body = append(snake.body, getXY(desk))
 	snake.length = 3
 	snake.direction = getRandomDirection()
-	food.position = []coordinate{}
+	food.position = make(map[coordinate]struct{}, food.limit)
 	return desk, snake, food
 }
 
@@ -121,8 +121,10 @@ func Run(width int, height int, foodLimit int) {
 	}
 	screen.SetStyle(tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack))
 	screen.Clear()
-	desk, snake, food := newGame(screen, width, height)
-	food.limit = foodLimit
+	dsk, snk, fd := newGame(screen, width, height)
+	if fd.limit != 0 {
+		fd.limit = foodLimit
+	}
 	keyEvents := make(chan button)
 	go getEvents(screen, keyEvents)
 	for run {
@@ -132,26 +134,26 @@ func Run(width int, height int, foodLimit int) {
 			case QUIT:
 				run = false
 			case RESTART:
-				if !desk.running {
-					desk, snake, food = restartGame(desk, snake, food)
+				if !dsk.running {
+					dsk, snk, fd = restartGame(dsk, snk, fd)
 				}
 			case UP, DOWN, LEFT, RIGHT:
-				if validDirectionSelected(snake.direction, bPressed) {
-					snake.direction = bPressed
+				if validDirectionSelected(snk.direction, bPressed) {
+					snk.direction = bPressed
 				}
 			}
 		case <-time.After(time.Millisecond * 50):
 		}
-		drawDesk(screen, desk)
-		if desk.running {
-			drawSnake(screen, desk, snake)
-			addFood(food, snake, desk)
-			drawFood(screen, desk, food)
-			ateFood(food, snake, desk)
-			checkCollision(snake, desk)
+		drawDesk(screen, dsk)
+		if dsk.running {
+			drawSnake(screen, dsk, snk)
+			addFood(fd, snk, dsk)
+			drawFood(screen, dsk, fd)
+			ateFood(fd, snk, dsk)
+			checkCollision(snk, dsk)
 		}
 		screen.Show()
-		time.Sleep(time.Millisecond * time.Duration(100-5*desk.level))
+		time.Sleep(time.Millisecond * time.Duration(100-5*dsk.level))
 	}
 	screen.Fini()
 }
