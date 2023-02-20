@@ -38,6 +38,9 @@ task run
 ```
 If you want to run the game from *Windows*, double-click on __*gosnake.exe*__ (you must use version of __*gosnake.exe*__ for the *Windows* architecture from the released binaries). For *macOS*, use the __*"open with terminal"*__ context menu on __*gosnake*__ and confirm launch with the __*"open"*__ button (you have to use version of __*gosnake*__ for the *Darwin* architecture from the released binaries).
 
+You can use [brew](https://brew.sh/) to install **gosnake** to your [computer](https://github.com/streamdp/homebrew-games) (macOs/linux) 
+
+
 # App builtin help
 
 ```bash
