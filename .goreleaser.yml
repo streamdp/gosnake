@@ -12,12 +12,12 @@ builds:
       - windows
       - darwin
 archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
+  - name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
 checksum:
   name_template: 'checksums.txt'
 snapshot:
@@ -30,7 +30,8 @@ changelog:
       - '^test:'
 brews:
   - name: gosnake
-    homepage: https://github.com/streamdp/gosnake
+    homepage: https://github.com/streamdp/homebrew-games
     tap:
       owner: streamdp
-      name: games
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+      name: homebrew-games
