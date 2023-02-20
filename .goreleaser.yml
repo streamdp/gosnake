@@ -28,3 +28,9 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+brews:
+  - name: gosnake
+    homepage: https://github.com/streamdp/gosnake
+    tap:
+      owner: streamdp
+      name: games
