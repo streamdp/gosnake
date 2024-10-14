@@ -26,6 +26,7 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+version: 2
 brews:
   - name: gosnake
     homepage: https://github.com/streamdp/homebrew-games
