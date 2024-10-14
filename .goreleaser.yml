@@ -1,3 +1,4 @@
+version: 2
 before:
   hooks:
     - go mod tidy
@@ -26,11 +27,10 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-version: 2
 brews:
   - name: gosnake
     homepage: https://github.com/streamdp/homebrew-games
-    tap:
+    repository:
       owner: streamdp
       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
       name: homebrew-games
