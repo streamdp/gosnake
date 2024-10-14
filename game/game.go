@@ -2,7 +2,6 @@ package game
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
 	"strconv"
 	"time"
@@ -65,18 +64,19 @@ func (g *Game) restartGame() *Game {
 }
 
 func getEvents(screen tcell.Screen, buttonPressed chan button) {
-	previousPressed := button(0)
+	previousPressed := RESTART
 	for {
 		event := screen.PollEvent()
-		switch event := event.(type) {
+		switch e := event.(type) {
 		case *tcell.EventResize:
 			screen.Sync()
 		case *tcell.EventKey:
-			switch event.Key() {
+			switch e.Key() {
 			case tcell.KeyEscape:
 				buttonPressed <- QUIT
 				return
 			case tcell.KeyEnter:
+				previousPressed = RESTART
 				buttonPressed <- RESTART
 			case tcell.KeyUp:
 				if previousPressed != UP {
@@ -98,6 +98,8 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 					buttonPressed <- RIGHT
 					previousPressed = RIGHT
 				}
+			default:
+				continue
 			}
 		}
 	}
@@ -186,7 +188,6 @@ func newScreen() tcell.Screen {
 }
 
 func NewGame(width int, height int, foodLimit int) *Game {
-	rand.Seed(time.Now().UnixNano())
 	g := newGame(newScreen(), width, height)
 	g.food.limit = foodLimit
 	return g

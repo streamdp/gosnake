@@ -11,6 +11,7 @@ func main() {
 	var showHelp bool
 	var width int
 	var height int
+
 	var foodLimit int
 
 	flag.BoolVar(&showHelp, "h", false, "display help")
