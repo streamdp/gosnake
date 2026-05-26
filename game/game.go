@@ -66,7 +66,6 @@ func (g *Game) restartGame() *Game {
 }
 
 func getEvents(screen tcell.Screen, buttonPressed chan button) {
-	previousPressed := RESTART
 	for event := range screen.EventQ() {
 		switch e := event.(type) {
 		case *tcell.EventResize:
@@ -77,28 +76,15 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 				buttonPressed <- QUIT
 				return
 			case tcell.KeyEnter:
-				previousPressed = RESTART
 				buttonPressed <- RESTART
 			case tcell.KeyUp:
-				if previousPressed != UP {
-					buttonPressed <- UP
-					previousPressed = UP
-				}
+				buttonPressed <- UP
 			case tcell.KeyDown:
-				if previousPressed != DOWN {
-					buttonPressed <- DOWN
-					previousPressed = DOWN
-				}
+				buttonPressed <- DOWN
 			case tcell.KeyLeft:
-				if previousPressed != LEFT {
-					buttonPressed <- LEFT
-					previousPressed = LEFT
-				}
+				buttonPressed <- LEFT
 			case tcell.KeyRight:
-				if previousPressed != RIGHT {
-					buttonPressed <- RIGHT
-					previousPressed = RIGHT
-				}
+				buttonPressed <- RIGHT
 			case tcell.KeyF2:
 				buttonPressed <- PAUSE
 			default:
