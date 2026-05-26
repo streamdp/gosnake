@@ -6,7 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 	"github.com/mattn/go-runewidth"
 )
 
@@ -20,6 +21,7 @@ const (
 	DOWN
 	QUIT
 	RESTART
+	PAUSE
 )
 
 type Game struct {
@@ -57,6 +59,7 @@ func (g *Game) restartGame() *Game {
 	g.snake.body = []coordinate{}
 	g.snake.body = append(g.snake.body, g.desk.getRandPoint())
 	g.snake.length = 3
+	g.snake.idle = true
 	g.snake.direction = getRandomDirection()
 	g.food.position = make(map[coordinate]struct{}, g.food.limit)
 	g.running = true
@@ -65,8 +68,7 @@ func (g *Game) restartGame() *Game {
 
 func getEvents(screen tcell.Screen, buttonPressed chan button) {
 	previousPressed := RESTART
-	for {
-		event := screen.PollEvent()
+	for event := range screen.EventQ() {
 		switch e := event.(type) {
 		case *tcell.EventResize:
 			screen.Sync()
@@ -98,6 +100,8 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 					buttonPressed <- RIGHT
 					previousPressed = RIGHT
 				}
+			case tcell.KeyF2:
+				buttonPressed <- PAUSE
 			default:
 				continue
 			}
@@ -106,16 +110,27 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 }
 
 func drawStr(screen tcell.Screen, x int, y int, style tcell.Style, str string) {
-	for _, c := range str {
-		var comb []rune
-		width := runewidth.RuneWidth(c)
-		if width == 0 {
-			comb = []rune{c}
-			c = ' '
-			width = 1
+	w, _ := screen.Size()
+	for i := 0; i < w; {
+		if i < x || i > len(str) {
+			screen.SetContent(i, y, ' ', nil, style)
+			i++
+
+			continue
 		}
-		screen.SetContent(x, y, c, comb, style)
-		x += width
+
+		for _, c := range str {
+			var comb []rune
+			width := runewidth.RuneWidth(c)
+			if width == 0 {
+				comb = []rune{c}
+				c = ' '
+				width = 1
+			}
+			screen.SetContent(x, y, c, comb, style)
+			x += width
+		}
+		i += len(str)
 	}
 }
 
@@ -129,29 +144,64 @@ func (g *Game) drawDesk() {
 			}
 		}
 	}
+
 	if !g.isRunning() {
-		style := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorDarkRed)
+		style := tcell.StyleDefault.Foreground(color.White).Background(color.DarkRed)
 		text := "GAME OVER! YOU SCORE: " + strconv.Itoa(g.desk.score)
-		drawStr(g.screen, g.desk.rect.shiftX+g.desk.rect.width/2-len([]rune(text))/2, g.desk.rect.height/2, style, text)
+		drawStr(
+			g.screen,
+			g.desk.rect.shiftX+g.desk.rect.width/2-len([]rune(text))/2,
+			g.desk.rect.height/2,
+			style,
+			text,
+		)
 		text = "PRESS ESC TO QUIT OR ENTER TO PLAY AGAIN"
-		drawStr(g.screen, g.desk.rect.shiftX+g.desk.rect.width/2-len([]rune(text))/2, g.desk.rect.height/2+1, style.Reverse(true), text)
+		drawStr(
+			g.screen,
+			g.desk.rect.shiftX+g.desk.rect.width/2-len([]rune(text))/2,
+			g.desk.rect.height/2+1,
+			style.Reverse(true),
+			text,
+		)
+
 		return
 	}
-	style := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack)
+
+	style := tcell.StyleDefault.Foreground(color.White).Background(color.Black)
 	text := "Score: " + strconv.Itoa(g.desk.score) + "  Level: " + strconv.Itoa(g.desk.level)
+
+	if g.snake.idle {
+		text += "    Game PAUSED (any arrows or F2 to unpause)"
+	}
+
 	drawStr(g.screen, g.desk.rect.shiftX+1, 0, style, text)
 }
 
 func (g *Game) drawSnake() {
 	g.snake.moveSnake()
-	g.screen.SetContent(g.desk.rect.shiftX+g.snake.body[0].x, g.desk.rect.shiftY+g.snake.body[0].y, tcell.RuneCkBoard, nil, g.snake.palette.head)
+	g.screen.SetContent(
+		g.desk.rect.shiftX+g.snake.body[0].x,
+		g.desk.rect.shiftY+g.snake.body[0].y,
+		tcell.RuneCkBoard,
+		nil,
+		g.snake.palette.head,
+	)
 	for i := 1; i < g.snake.length; i++ {
-		g.screen.SetContent(g.desk.rect.shiftX+g.snake.body[i].x, g.desk.rect.shiftY+g.snake.body[i].y, tcell.RuneBoard, nil, g.snake.palette.body)
+		if i >= len(g.snake.body) {
+			continue
+		}
+		g.screen.SetContent(
+			g.desk.rect.shiftX+g.snake.body[i].x,
+			g.desk.rect.shiftY+g.snake.body[i].y,
+			tcell.RuneBoard,
+			nil,
+			g.snake.palette.body,
+		)
 	}
 }
 
 func (g *Game) drawFood() {
-	style := tcell.StyleDefault.Background(tcell.ColorDarkMagenta)
+	style := tcell.StyleDefault.Background(color.DarkMagenta)
 	for fp := range g.food.position {
 		g.screen.SetContent(g.desk.rect.shiftX+fp.x, g.desk.rect.shiftY+fp.y, tcell.RuneCkBoard, nil, style)
 	}
@@ -163,7 +213,8 @@ func (g *Game) checkCollisions() {
 			g.running = false
 		}
 	}
-	if (g.snake.body[0].x == 1 || g.snake.body[0].x == g.desk.rect.width-2) || (g.snake.body[0].y == 0 || g.snake.body[0].y == g.desk.rect.height-1) {
+	if (g.snake.body[0].x == 1 || g.snake.body[0].x == g.desk.rect.width-2) ||
+		(g.snake.body[0].y == 0 || g.snake.body[0].y == g.desk.rect.height-1) {
 		g.running = false
 	}
 }
@@ -182,7 +233,7 @@ func newScreen() tcell.Screen {
 		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
-	screen.SetStyle(tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack))
+	screen.SetStyle(tcell.StyleDefault.Foreground(color.White).Background(color.Black))
 	screen.Clear()
 	return screen
 }
@@ -208,7 +259,13 @@ func (g *Game) Run() {
 				if !g.isRunning() {
 					g.restartGame()
 				}
+			case PAUSE:
+				g.snake.idle = !g.snake.idle
 			case UP, DOWN, LEFT, RIGHT:
+				if g.snake.idle {
+					g.snake.idle = false
+				}
+
 				g.snake.setDirection(bPressed)
 			}
 		case <-time.After(time.Millisecond * 50):

@@ -3,7 +3,8 @@ package game
 import (
 	"math/rand"
 
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 )
 
 type coordinate struct {
@@ -24,8 +25,8 @@ type deskPalette struct {
 }
 
 var defaultDeskPalette = &deskPalette{
-	inner: tcell.StyleDefault.Background(tcell.ColorBisque),
-	outer: tcell.StyleDefault.Background(tcell.ColorPaleVioletRed),
+	inner: tcell.StyleDefault.Background(color.Bisque),
+	outer: tcell.StyleDefault.Background(color.PaleVioletRed),
 }
 
 type rect struct {

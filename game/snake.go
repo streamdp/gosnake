@@ -3,7 +3,8 @@ package game
 import (
 	"math/rand"
 
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v3"
+	"github.com/gdamore/tcell/v3/color"
 )
 
 type snakePalette struct {
@@ -16,11 +17,12 @@ type snake struct {
 	direction button
 	length    int
 	palette   *snakePalette
+	idle      bool
 }
 
 var defaultSnakePalette = &snakePalette{
-	head: tcell.StyleDefault.Background(tcell.Color161),
-	body: tcell.StyleDefault.Background(tcell.Color170),
+	head: tcell.StyleDefault.Background(color.XTerm161),
+	body: tcell.StyleDefault.Background(color.XTerm170),
 }
 
 func getRandomDirection() button {
@@ -29,10 +31,10 @@ func getRandomDirection() button {
 
 func newSnake(xy coordinate, palette *snakePalette) *snake {
 	return &snake{
-		body:      []coordinate{xy},
-		direction: getRandomDirection(),
-		length:    3,
-		palette:   palette,
+		body:    []coordinate{xy},
+		length:  3,
+		palette: palette,
+		idle:    true,
 	}
 }
 
@@ -61,9 +63,14 @@ func (s *snake) setDirection(new button) {
 }
 
 func (s *snake) moveSnake() {
+	if s.idle {
+		return
+	}
+
 	bodyLength := len(s.body)
 	lastSegment := s.body[bodyLength-1]
 	firstSegment := s.body[0]
+
 	switch s.direction {
 	case LEFT:
 		s.body[0].x -= 1
