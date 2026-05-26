@@ -59,8 +59,7 @@ func (g *Game) restartGame() *Game {
 	g.snake.body = []coordinate{}
 	g.snake.body = append(g.snake.body, g.desk.getRandPoint())
 	g.snake.length = 3
-	g.snake.idle = true
-	g.snake.direction = getRandomDirection()
+	g.snake.paused = true
 	g.food.position = make(map[coordinate]struct{}, g.food.limit)
 	g.running = true
 	return g
@@ -109,28 +108,28 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 	}
 }
 
-func drawStr(screen tcell.Screen, x int, y int, style tcell.Style, str string) {
-	w, _ := screen.Size()
-	for i := 0; i < w; {
-		if i < x || i > len(str) {
-			screen.SetContent(i, y, ' ', nil, style)
-			i++
-
-			continue
-		}
-
-		for _, c := range str {
-			var comb []rune
-			width := runewidth.RuneWidth(c)
-			if width == 0 {
-				comb = []rune{c}
-				c = ' '
-				width = 1
+func drawStr(screen tcell.Screen, x int, y int, style tcell.Style, str string, clr bool) {
+	if clr {
+		w, _ := screen.Size()
+		for i := 0; i < w; i++ {
+			if i >= x && i < x+len([]rune(str)) {
+				continue
 			}
-			screen.SetContent(x, y, c, comb, style)
-			x += width
+
+			screen.SetContent(i, y, ' ', nil, style)
 		}
-		i += len(str)
+	}
+
+	for _, c := range str {
+		var comb []rune
+		width := runewidth.RuneWidth(c)
+		if width == 0 {
+			comb = []rune{c}
+			c = ' '
+			width = 1
+		}
+		screen.SetContent(x, y, c, comb, style)
+		x += width
 	}
 }
 
@@ -154,6 +153,7 @@ func (g *Game) drawDesk() {
 			g.desk.rect.height/2,
 			style,
 			text,
+			false,
 		)
 		text = "PRESS ESC TO QUIT OR ENTER TO PLAY AGAIN"
 		drawStr(
@@ -162,19 +162,22 @@ func (g *Game) drawDesk() {
 			g.desk.rect.height/2+1,
 			style.Reverse(true),
 			text,
+			false,
 		)
 
 		return
 	}
 
 	style := tcell.StyleDefault.Foreground(color.White).Background(color.Black)
-	text := "Score: " + strconv.Itoa(g.desk.score) + "  Level: " + strconv.Itoa(g.desk.level)
 
-	if g.snake.idle {
-		text += "    Game PAUSED (any arrows or F2 to unpause)"
+	var msg string
+	if g.snake.paused {
+		msg = "     Game PAUSED (any arrows or F2 to unpause)"
 	}
 
-	drawStr(g.screen, g.desk.rect.shiftX+1, 0, style, text)
+	text := fmt.Sprintf("Score: %d  Level: %d%s\r", g.desk.score, g.desk.level, msg)
+
+	drawStr(g.screen, g.desk.rect.shiftX+1, 0, style, text, true)
 }
 
 func (g *Game) drawSnake() {
@@ -260,10 +263,13 @@ func (g *Game) Run() {
 					g.restartGame()
 				}
 			case PAUSE:
-				g.snake.idle = !g.snake.idle
+				g.snake.paused = !g.snake.paused
+				if g.snake.direction == 0 {
+					g.snake.setDirection(getRandomDirection())
+				}
 			case UP, DOWN, LEFT, RIGHT:
-				if g.snake.idle {
-					g.snake.idle = false
+				if g.snake.paused {
+					g.snake.paused = false
 				}
 
 				g.snake.setDirection(bPressed)

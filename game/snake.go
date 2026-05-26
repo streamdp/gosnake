@@ -17,7 +17,7 @@ type snake struct {
 	direction button
 	length    int
 	palette   *snakePalette
-	idle      bool
+	paused    bool
 }
 
 var defaultSnakePalette = &snakePalette{
@@ -34,7 +34,7 @@ func newSnake(xy coordinate, palette *snakePalette) *snake {
 		body:    []coordinate{xy},
 		length:  3,
 		palette: palette,
-		idle:    true,
+		paused:  true,
 	}
 }
 
@@ -63,7 +63,7 @@ func (s *snake) setDirection(new button) {
 }
 
 func (s *snake) moveSnake() {
-	if s.idle {
+	if s.paused {
 		return
 	}
 
