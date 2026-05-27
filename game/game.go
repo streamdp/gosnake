@@ -111,10 +111,7 @@ func (g *Game) restartGame() *Game {
 	g.screen.Clear()
 	g.desk.level = 1
 	g.desk.score = 0
-	g.snake.body = []coordinate{}
-	g.snake.body = append(g.snake.body, g.desk.getRandPoint())
-	g.snake.length = 3
-	g.snake.paused = true
+	g.snake = newSnake(g.desk.getRandPoint(), defaultSnakePalette)
 	g.food.position = make(map[coordinate]struct{}, g.food.limit)
 	g.running = true
 
