@@ -1,7 +1,7 @@
 package game
 
 import (
-	"math/rand"
+	"math/rand/v2"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
@@ -56,7 +56,7 @@ func newRect(screenSize, width int, height int) *rect {
 
 func (d *desk) getRandPoint() coordinate {
 	return coordinate{
-		x: 2 + rand.Intn(d.rect.width-4),
-		y: 1 + rand.Intn(d.rect.height-2),
+		x: 2 + rand.IntN(d.rect.width-4),
+		y: 1 + rand.IntN(d.rect.height-2),
 	}
 }

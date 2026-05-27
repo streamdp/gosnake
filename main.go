@@ -8,11 +8,12 @@ import (
 )
 
 func main() {
-	var showHelp bool
-	var width int
-	var height int
-
-	var foodLimit int
+	var (
+		showHelp  bool
+		width     int
+		height    int
+		foodLimit int
+	)
 
 	flag.BoolVar(&showHelp, "h", false, "display help")
 	flag.IntVar(&width, "width", 70, "set width of the game desk")
@@ -24,7 +25,9 @@ func main() {
 		fmt.Println("gosnake is a version of the classic snake game written in golang with a library tcell.")
 		fmt.Println("")
 		flag.Usage()
+
 		return
 	}
+
 	game.NewGame(width, height, foodLimit).Run()
 }

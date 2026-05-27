@@ -1,7 +1,7 @@
 package game
 
 import (
-	"math/rand"
+	"math/rand/v2"
 
 	"github.com/gdamore/tcell/v3"
 	"github.com/gdamore/tcell/v3/color"
@@ -26,7 +26,7 @@ var defaultSnakePalette = &snakePalette{
 }
 
 func getRandomDirection() button {
-	return button(rand.Intn(4) + 1)
+	return button(rand.IntN(4) + 1)
 }
 
 func newSnake(xy coordinate, palette *snakePalette) *snake {
@@ -42,8 +42,10 @@ func (s *snake) ateFood(food *food, desk *desk) {
 	for fp := range food.position {
 		if fp.x == s.body[0].x && fp.y == s.body[0].y {
 			delete(food.position, fp)
+
 			s.length += 1
 			desk.score += 100
+
 			if s.length%10 == 0 {
 				desk.level += 1
 			}
@@ -51,15 +53,16 @@ func (s *snake) ateFood(food *food, desk *desk) {
 	}
 }
 
-func (s *snake) setDirection(new button) {
-	if s.direction == UP && new == DOWN || s.direction == DOWN && new == UP {
+func (s *snake) setDirection(dir button) {
+	if s.direction == UP && dir == DOWN || s.direction == DOWN && dir == UP {
 		return
 	}
-	if s.direction == LEFT && new == RIGHT || s.direction == RIGHT && new == LEFT {
+
+	if s.direction == LEFT && dir == RIGHT || s.direction == RIGHT && dir == LEFT {
 		return
 	}
-	s.direction = new
-	return
+
+	s.direction = dir
 }
 
 func (s *snake) moveSnake() {
@@ -78,6 +81,7 @@ func (s *snake) moveSnake() {
 			if i >= bodyLength {
 				s.body = append(s.body, lastSegment)
 			}
+
 			firstSegment, s.body[i] = s.body[i], firstSegment
 		}
 	case RIGHT:
@@ -86,6 +90,7 @@ func (s *snake) moveSnake() {
 			if i >= bodyLength {
 				s.body = append(s.body, lastSegment)
 			}
+
 			firstSegment, s.body[i] = s.body[i], firstSegment
 		}
 	case UP:
@@ -94,14 +99,17 @@ func (s *snake) moveSnake() {
 			if i >= bodyLength {
 				s.body = append(s.body, lastSegment)
 			}
+
 			firstSegment, s.body[i] = s.body[i], firstSegment
 		}
 	case DOWN:
 		s.body[0].y += 1
+
 		for i := 1; i < s.length; i++ {
 			if i >= bodyLength {
 				s.body = append(s.body, lastSegment)
 			}
+
 			firstSegment, s.body[i] = s.body[i], firstSegment
 		}
 	}
