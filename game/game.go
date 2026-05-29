@@ -66,6 +66,10 @@ func (g *Game) Run() {
 					g.snake.paused = false
 				}
 
+				if g.snake.direction == bPressed {
+					continue
+				}
+
 				g.snake.setDirection(bPressed)
 			}
 		case <-time.After(time.Millisecond * 50):
