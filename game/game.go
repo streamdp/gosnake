@@ -127,6 +127,10 @@ func getEvents(screen tcell.Screen, buttonPressed chan button) {
 		switch e := event.(type) {
 		case *tcell.EventResize:
 			screen.Sync()
+		case *tcell.EventFocus:
+			if !e.Focused {
+				buttonPressed <- PAUSE
+			}
 		case *tcell.EventKey:
 			switch e.Key() {
 			case tcell.KeyEscape:
@@ -304,6 +308,7 @@ func newScreen() tcell.Screen {
 	}
 
 	screen.SetStyle(tcell.StyleDefault.Foreground(color.White).Background(color.Black))
+	screen.EnableFocus()
 	screen.Clear()
 
 	return screen
