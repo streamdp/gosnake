@@ -25,16 +25,19 @@ const (
 )
 
 type Game struct {
-	screen  tcell.Screen
-	desk    *desk
-	snake   *snake
-	food    *food
-	running bool
+	screen    tcell.Screen
+	desk      *desk
+	snake     *snake
+	food      *food
+	keyEvents chan button
+	running   bool
 }
 
 func NewGame(width int, height int, foodLimit int) *Game {
 	g := newGame(newScreen(), width, height)
 	g.food.limit = foodLimit
+
+	go g.getEvents()
 
 	return g
 }
@@ -43,12 +46,9 @@ func NewGame(width int, height int, foodLimit int) *Game {
 func (g *Game) Run() {
 	defer g.screen.Fini()
 
-	keyEvents := make(chan button)
-	go getEvents(g.screen, keyEvents)
-
 	for {
 		select {
-		case bPressed := <-keyEvents:
+		case bPressed := <-g.keyEvents:
 			switch bPressed {
 			case QUIT:
 				return
@@ -103,11 +103,12 @@ func newGame(screen tcell.Screen, width int, height int) *Game {
 	d := newDesk(newRect(screenSize, width, height), defaultDeskPalette)
 
 	return &Game{
-		screen:  screen,
-		desk:    d,
-		snake:   newSnake(d.getRandPoint(), defaultSnakePalette),
-		food:    newFood(),
-		running: true,
+		screen:    screen,
+		desk:      d,
+		snake:     newSnake(d.getRandPoint(), defaultSnakePalette),
+		food:      newFood(),
+		keyEvents: make(chan button),
+		running:   true,
 	}
 }
 
@@ -122,33 +123,33 @@ func (g *Game) restartGame() *Game {
 	return g
 }
 
-func getEvents(screen tcell.Screen, buttonPressed chan button) {
-	for event := range screen.EventQ() {
+func (g *Game) getEvents() {
+	for event := range g.screen.EventQ() {
 		switch e := event.(type) {
 		case *tcell.EventResize:
-			screen.Sync()
+			g.screen.Sync()
 		case *tcell.EventFocus:
-			if !e.Focused {
-				buttonPressed <- PAUSE
+			if !e.Focused && !g.snake.paused {
+				g.keyEvents <- PAUSE
 			}
 		case *tcell.EventKey:
 			switch e.Key() {
 			case tcell.KeyEscape:
-				buttonPressed <- QUIT
+				g.keyEvents <- QUIT
 
 				return
 			case tcell.KeyEnter:
-				buttonPressed <- RESTART
+				g.keyEvents <- RESTART
 			case tcell.KeyUp:
-				buttonPressed <- UP
+				g.keyEvents <- UP
 			case tcell.KeyDown:
-				buttonPressed <- DOWN
+				g.keyEvents <- DOWN
 			case tcell.KeyLeft:
-				buttonPressed <- LEFT
+				g.keyEvents <- LEFT
 			case tcell.KeyRight:
-				buttonPressed <- RIGHT
+				g.keyEvents <- RIGHT
 			case tcell.KeyF2:
-				buttonPressed <- PAUSE
+				g.keyEvents <- PAUSE
 			default:
 				continue
 			}
