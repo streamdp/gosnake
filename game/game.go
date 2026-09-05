@@ -31,11 +31,14 @@ type Game struct {
 	food      *food
 	keyEvents chan button
 	running   bool
+
+	adjustableScreen bool
 }
 
-func NewGame(width int, height int, foodLimit int) *Game {
+func NewGame(width int, height int, foodLimit int, adjustableScreen bool) *Game {
 	g := newGame(newScreen(), width, height)
 	g.food.limit = foodLimit
+	g.adjustableScreen = adjustableScreen
 
 	go g.getEvents()
 
@@ -128,6 +131,9 @@ func (g *Game) getEvents() {
 		switch e := event.(type) {
 		case *tcell.EventResize:
 			g.screen.Sync()
+			if g.adjustableScreen {
+				g.updateDeskSize()
+			}
 		case *tcell.EventFocus:
 			if !e.Focused && !g.snake.paused {
 				g.keyEvents <- PAUSE
@@ -313,4 +319,24 @@ func newScreen() tcell.Screen {
 	screen.Clear()
 
 	return screen
+}
+
+func (g *Game) updateDeskSize() {
+	w, h := g.screen.Size()
+
+	if w < minWidth || h < minHeight {
+		return
+	}
+
+	isNeedRestart := true
+	if w > g.desk.rect.width && h > g.desk.rect.height {
+		isNeedRestart = false
+	}
+
+	g.screen.Clear()
+	g.food.limit = w * h / 140
+
+	if g.desk.rect = newRect(w, w-borderSize, h-borderSize); isNeedRestart {
+		g.restartGame()
+	}
 }

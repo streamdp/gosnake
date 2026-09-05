@@ -7,6 +7,12 @@ import (
 	"github.com/gdamore/tcell/v3/color"
 )
 
+const (
+	borderSize = 2
+	minWidth   = 32
+	minHeight  = 6
+)
+
 type coordinate struct {
 	x int
 	y int
@@ -56,7 +62,7 @@ func newRect(screenSize, width int, height int) *rect {
 
 func (d *desk) getRandPoint() coordinate {
 	return coordinate{
-		x: 2 + rand.IntN(d.rect.width-4),
-		y: 1 + rand.IntN(d.rect.height-2),
+		x: borderSize + rand.IntN(d.rect.width-2*borderSize),
+		y: borderSize + rand.IntN(d.rect.height-2*borderSize-1),
 	}
 }
