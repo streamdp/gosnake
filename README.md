@@ -48,6 +48,7 @@ $ ./gosnake -h
 gosnake is a version of the classic snake game written in golang with a library tcell.
 
 Usage of ./gosnake:
+  -adjustable-screen screen size can be automatically adjusted to the terminal window size (default true)
   -h display help
   -heigth int
      set heigth of the game desk (default 20)

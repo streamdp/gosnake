@@ -63,6 +63,6 @@ func newRect(screenSize, width int, height int) *rect {
 func (d *desk) getRandPoint() coordinate {
 	return coordinate{
 		x: borderSize + rand.IntN(d.rect.width-2*borderSize),
-		y: borderSize + rand.IntN(d.rect.height-2*borderSize-1),
+		y: borderSize - 1 + rand.IntN(d.rect.height-borderSize),
 	}
 }

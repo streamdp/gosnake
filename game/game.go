@@ -36,8 +36,7 @@ type Game struct {
 }
 
 func NewGame(width int, height int, foodLimit int, adjustableScreen bool) *Game {
-	g := newGame(newScreen(), width, height)
-	g.food.limit = foodLimit
+	g := newGame(newScreen(), width, height, foodLimit)
 	g.adjustableScreen = adjustableScreen
 
 	go g.getEvents()
@@ -101,7 +100,7 @@ func (g *Game) level() int {
 	return g.desk.level
 }
 
-func newGame(screen tcell.Screen, width int, height int) *Game {
+func newGame(screen tcell.Screen, width int, height int, foodLimit int) *Game {
 	screenSize, _ := screen.Size()
 	d := newDesk(newRect(screenSize, width, height), defaultDeskPalette)
 
@@ -109,7 +108,7 @@ func newGame(screen tcell.Screen, width int, height int) *Game {
 		screen:    screen,
 		desk:      d,
 		snake:     newSnake(d.getRandPoint(), defaultSnakePalette),
-		food:      newFood(),
+		food:      newFood(width, height, foodLimit),
 		keyEvents: make(chan button),
 		running:   true,
 	}
@@ -334,7 +333,7 @@ func (g *Game) updateDeskSize() {
 	}
 
 	g.screen.Clear()
-	g.food.limit = w * h / 140
+	g.food.limit = w * h / g.food.proportion
 
 	if g.desk.rect = newRect(w, w-borderSize, h-borderSize); isNeedRestart {
 		g.restartGame()

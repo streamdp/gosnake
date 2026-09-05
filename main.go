@@ -21,7 +21,7 @@ func main() {
 	flag.IntVar(&height, "height", 20, "set height of the game desk")
 	flag.IntVar(&foodLimit, "limit", 10, "set food limit")
 	flag.BoolVar(&adjustableScreen, "adjustable-screen", true,
-		"screen size can be automatically adjusted to terminal window size",
+		"screen size can be automatically adjusted to the terminal window size",
 	)
 
 	flag.Parse()

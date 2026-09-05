@@ -1,14 +1,16 @@
 package game
 
 type food struct {
-	position map[coordinate]struct{}
-	limit    int
+	position   map[coordinate]struct{}
+	limit      int
+	proportion int
 }
 
-func newFood() *food {
+func newFood(w, h, limit int) *food {
 	return &food{
-		position: make(map[coordinate]struct{}, 10),
-		limit:    10,
+		position:   make(map[coordinate]struct{}, limit),
+		limit:      limit,
+		proportion: w * h / limit,
 	}
 }
 
